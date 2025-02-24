@@ -1,0 +1,65 @@
+{% extends 'movies/base.html' %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+<div class="container mt-5 p-5 border border-dark rounded-2">
+    <form action="" method="post">
+        {% csrf_token %}
+        <legend class="text-center">Sign Up</legend>
+    
+        <div class="row mb-3 justify-content-center">
+            <div class="col-12 col-md-4">
+                <label class="form-label">Username</label>
+                {{ form.username }}
+            </div>
+        </div>
+
+        <div class="row mb-3 justify-content-center">
+            <div class="col-12 col-md-4">
+                <label class="form-label">Email</label>
+                {{ form.email }}
+            </div>
+        </div>
+
+        <div class="row mb-3 justify-content-center">
+            <div class="col-12 col-md-4">
+                <label class="form-label">Password</label>
+                {{ form.password1 }}
+            </div>
+        </div>
+
+        <div class="row mb-3 justify-content-center">
+            <div class="col-12 col-md-4">
+                <label class="form-label">Confirm password</label>
+                {{ form.password2 }}
+            </div>
+        </div>
+
+        {% if form.errors or form.non_field_errors %}
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <div class="row mb-3 justify-content-center">
+                        <div class="col-12 col-md-4 text-danger">
+                            {{error}}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+            
+            {% for error in form.non_field_errors %}
+                <div class="row mb-3 justify-content-center">
+                    <div class="col-12 col-md-4 text-danger">
+                        {{error}}
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary py-2 px-3">Sign Up</button>
+        </div>
+        <input type="hidden" name="next" value="{{ next }}">
+    </form>
+</div>
+{% endblock %}

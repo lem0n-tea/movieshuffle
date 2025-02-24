@@ -1,0 +1,182 @@
+{% extends 'movies/base.html' %}
+
+{% block title %}Add New Title{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="row justify-content-center mb-3">
+            <div class="col-md-8 col-lg-6">
+                <div class="d-flex">
+                    <form class="input-group" action="{% url 'add-new' %}" method="post">
+                        {% csrf_token %}
+                        <input name="search" type="text" class="form-control" aria-label="Text input with segmented dropdown button" placeholder="Search for title" value="{% if prev_query %}{{ prev_query }}{% endif %}">
+                        <button type="submit" class="btn btn-outline-secondary">Search</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {% if movies %}
+            {% for movie in movies %}
+                {% if movie in user_movies %}
+                    <div class="card mb-3 col-md-8 col-lg-6 mx-auto">
+                        <div class="row g-0">
+                            <div class="col-md-4">
+                            {% load static %}
+                            <img src="{% if movie.poster %}{{ movie.poster.url }}{% else %}{% static 'img/cinema.svg' %}{% endif %}" class="img-fluid rounded-start" alt="Poster" loading="lazy">
+                            </div>
+                            <div class="col-md-8">
+                            <div class="card-body d-flex flex-column h-100">
+                                <div class="mb-4">
+                                    <h5 class="card-title">{{ movie.title }}</h5>
+                                    {% if movie.description %}
+                                        <p class="card-text">{{ movie.description }}</p>
+                                    {% endif %}
+                                    <p class="card-text mb-0"><small class="text-body-secondary">Genres: {{ movie.genre_list }}</small></p>
+                                    <p class="card-text"><small class="text-body-secondary">Released: {{ movie.release_year }}</small></p>
+                                </div>
+                                <div class="mt-auto">
+                                    <p class="card-text"><small class="text-body-secondary">Already in your watchlist</small></p>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="card mb-3 col-md-8 col-lg-6 mx-auto">
+                        <div class="row g-0">
+                            <div class="col-md-4">
+                            {% load static %}
+                            <img src="{% if movie.primaryImage %}{{ movie.primaryImage }}{% else %}{% static 'img/cinema.svg' %}{% endif %}" class="img-fluid rounded-start" alt="Poster" loading="lazy">
+                            </div>
+                            <div class="col-md-8">
+                            <div class="card-body d-flex flex-column h-100">
+                                <div class="mb-4">
+                                    <h5 class="card-title">{{ movie.primaryTitle }}</h5>
+                                    {% if movie.description %}
+                                        <p class="card-text">{{ movie.description }}</p>
+                                    {% endif %}
+                                    <p class="card-text"><small class="text-body-secondary">Genres: {{ movie.genres|join:', ' }}</small></p>
+                                    <p class="card-text"><small class="text-body-secondary">Released: {{ movie.startYear }}</small></p>
+                                </div>
+                                <div class="mt-auto">
+                                    <form action="" method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="id" value="{{ movie.id }}">
+                                    <input type="hidden" name="primaryTitle" value="{{ movie.primaryTitle }}">
+                                    <input type="hidden" name="description" value="{{ movie.description }}">
+                                    <input type="hidden" name="genres" value="{{ movie.genres|join:', ' }}">
+                                    <input type="hidden" name="startYear" value="{{ movie.startYear }}">
+                                    <input type="hidden" name="primaryImage" value="{{ movie.primaryImage }}">
+
+                                    <input type="hidden" name="search" value="{{ prev_query }}">
+                                    
+                                    <button type="submit" class="btn btn-outline-primary">Add to watchlist</button>
+                                </form>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+            {% if movies.paginator.num_pages != 1 %}
+                {% load movies_extra %}
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        {% if movies.has_previous %}
+                            <li class="page-item"><a class="page-link" href="?{{ request.GET.urlencode|exclude_page_param }}&page=1">First</a></li>
+                        {% endif %}
+                        
+                        {% for i in closest_pages %}
+                            {% if i == movies.number %}
+                                <li class="page-item active" aria-current="page">
+                                    <span class="page-link">{{ i }}</span>
+                                </li>
+                            {% else %}
+                                <li class="page-item"><a class="page-link" href="?{{ request.GET.urlencode|exclude_page_param }}&page={{ i }}">{{ i }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if movies.has_next %}
+                        <li class="page-item"><a class="page-link" href="?{{ request.GET.urlencode|exclude_page_param }}&page={{ movies.paginator.num_pages }}">Last</a></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
+        {% else %}
+            {% if prev_query %}<p>No titles were found</p>{% endif %}
+        {% endif %}
+        <!--
+        {% if user_movies %}
+            {% for movie in user_movies %}
+                <div class="card mb-3 col-md-8 col-lg-6 mx-auto">
+                    <div class="row g-0">
+                        <div class="col-md-4">
+                        {% load static %}
+                        <img src="{% if movie.poster %}{{ movie.poster.url }}{% else %}{% static 'img/cinema.svg' %}{% endif %}" class="img-fluid rounded-start" alt="Poster" loading="lazy">
+                        </div>
+                        <div class="col-md-8">
+                        <div class="card-body d-flex flex-column h-100">
+                            <div class="mb-4">
+                                <h5 class="card-title">{{ movie.title }}</h5>
+                                {% if movie.description %}
+                                    <p class="card-text">{{ movie.description }}</p>
+                                {% endif %}
+                                <p class="card-text mb-0"><small class="text-body-secondary">Genres: {{ movie.genre_list }}</small></p>
+                                <p class="card-text"><small class="text-body-secondary">Released: {{ movie.release_year }}</small></p>
+                            </div>
+                            <div class="mt-auto">
+                                <p class="card-text"><small class="text-body-secondary">Already in your watchlist</small></p>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+        {% if found_movies %}
+            {% for movie in found_movies %}
+                <div class="card mb-3 col-md-8 col-lg-6 mx-auto">
+                    <div class="row g-0">
+                        <div class="col-md-4">
+                        <img src="{{ movie.primaryImage }}" class="img-fluid rounded-start" alt="Poster" loading="lazy">
+                        </div>
+                        <div class="col-md-8">
+                        <div class="card-body d-flex flex-column h-100">
+                            <div class="mb-4">
+                                <h5 class="card-title">{{ movie.primaryTitle }}</h5>
+                                {% if movie.description %}
+                                    <p class="card-text">{{ movie.description }}</p>
+                                {% endif %}
+                                <p class="card-text"><small class="text-body-secondary">Genres: {{ movie.genres|join:', ' }}</small></p>
+                                <p class="card-text"><small class="text-body-secondary">Released: {{ movie.startYear }}</small></p>
+                            </div>
+                            <div class="mt-auto">
+                                <form action="" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="id" value="{{ movie.id }}">
+                                <input type="hidden" name="primaryTitle" value="{{ movie.primaryTitle }}">
+                                <input type="hidden" name="description" value="{{ movie.description }}">
+                                <input type="hidden" name="genres" value="{{ movie.genres|join:', ' }}">
+                                <input type="hidden" name="startYear" value="{{ movie.startYear }}">
+                                <input type="hidden" name="primaryImage" value="{{ movie.primaryImage }}">
+
+                                <input type="hidden" name="search" value="{{ prev_query }}">
+                                
+                                <button type="submit" class="btn btn-outline-primary">Add to watchlist</button>
+                            </form>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+
+        {% else %}
+            {% if prev_query %}<p>No titles were found</p>{% endif %}
+        {% endif %}
+            -->
+    </div>
+{% endblock %}
