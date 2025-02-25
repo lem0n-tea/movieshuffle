@@ -1,0 +1,14 @@
+#sign-up-link:hover {
+    background-color: #343a40;
+    color: white;
+}
+
+#login-link:hover {
+    background-color: white !important;
+    color: rgb(13, 110, 253) !important;
+}
+
+#add-new-button:hover {
+    background-color: rgb(13, 110, 253);
+    color: white;
+}

@@ -1,0 +1,113 @@
+{% extends 'movies/base.html' %}
+
+{% block title %}My Watchlist{% endblock %}
+
+{% block content %}
+{{test}}
+    <div class="container mt-5">
+        <div class="row justify-content-center mb-3">
+            <div class="col-md-8 col-lg-6">
+                <div class="d-flex">
+                    <form class="input-group" action="" method="get">
+                        <input name="search" type="text" class="form-control" aria-label="Text input with segmented dropdown button" placeholder="Search for title" value="{% if prev_query %}{{ prev_query }}{% endif %}">
+                        <input type="hidden" name="selected_genres" value="{{ selected_genres }}">
+                        <button type="submit" class="btn btn-outline-secondary">Search</button>
+                    </form>
+                    <a class="btn btn-outline-primary ms-2" style="white-space: nowrap;" href="{% url 'add-new' %}" id="add-new-button">Add New</a>
+                </div>
+            </div>
+        </div>
+        <form class="row justify-content-center mb-3" action="" method="get">
+            <div class="d-flex col-md-8 col-lg-6">
+                <div class="dropdown">
+                    <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      Genres
+                    </button>
+                    <ul class="dropdown-menu px-2">
+                        {% for genre in genres %}
+                            <li>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="{{ genre.pk }}" id="genreCheck{{ genre.pk }}" name="genre" {% if genre.id in selected_genres %}checked{% endif %}>
+                                    <label class="form-check-label" for="genreCheck{{ genre.pk }}" onclick="event.stopPropagation();">{{ genre.name }}</label>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="dropdown ms-2">
+                    <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      Release Year
+                    </button>
+                    <ul class="dropdown-menu px-2">
+                        {% for genre in genres %}
+                            <li>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="{{ genre.pk }}" id="genreCheck{{ genre.pk }}" name="genres">
+                                    <label class="form-check-label" for="genreCheck{{ genre.pk }}" onclick="event.stopPropagation();">{{ genre.name }}</label>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <button type="submit" class="btn btn-outline-primary ms-2" style="white-space: nowrap;">Apply Filters</button>
+                <a  class="btn btn-outline-secondary ms-2" href="{% url 'watchlist' %}">Reset</a>
+            </div>
+        </form>
+        <div class="d-flex flex-column justify-content-center">
+        {% if movies %}
+            {% for movie in movies %}
+                <div class="card mb-3 col-md-8 col-lg-6 mx-auto">
+                    <div class="row g-0">
+                        <div class="col-md-4">
+                        {% load static %}
+                        <img src="{% if movie.poster %}{{ movie.poster.url }}{% else %}{% static 'img/cinema.svg' %}{% endif %}" class="img-fluid rounded-start" alt="Poster" loading="lazy">
+                        </div>
+                        <div class="col-md-8">
+                        <div class="card-body d-flex flex-column h-100">
+                            <div class="mb-4">
+                                <h5 class="card-title">{{ movie.title }}</h5>
+                                {% if movie.description %}
+                                    <p class="card-text">{{ movie.description }}</p>
+                                {% endif %}
+                                <p class="card-text mb-0"><small class="text-body-secondary">Genres: {{ movie.genre_list }}</small></p>
+                                <p class="card-text"><small class="text-body-secondary">Released: {{ movie.release_year }}</small></p>
+                            </div>
+                            <div class="mt-auto">
+                                <a href="{% url 'movie-removal' movie.imdb_id %}" class="btn btn-outline-danger">Remove</a>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No titles were found</p>
+        {% endif %}
+        </div>
+
+        {% if movies.paginator.num_pages != 1 %}
+            {% load movies_extra %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if movies.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?{{ request.GET.urlencode|exclude_page_param }}&page=1">First</a></li>
+                    {% endif %}
+                    
+                    {% for i in closest_pages %}
+                        {% if i == movies.number %}
+                            <li class="page-item active" aria-current="page">
+                                <span class="page-link">{{ i }}</span>
+                            </li>
+                        {% else %}
+                            <li class="page-item"><a class="page-link" href="?{{ request.GET.urlencode|exclude_page_param }}&page={{ i }}">{{ i }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if movies.has_next %}
+                    <li class="page-item"><a class="page-link" href="?{{ request.GET.urlencode|exclude_page_param }}&page={{ movies.paginator.num_pages }}">Last</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    </div>
+{% endblock %}
