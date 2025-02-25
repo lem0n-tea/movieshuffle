@@ -1,12 +1,13 @@
 import requests
+from os import environ
 from PIL import Image
 from io import BytesIO
 from django.core.files.base import ContentFile
 
-API_URL = "https://imdb236.p.rapidapi.com/imdb/search"
+API_URL = environ.get('API_URL')
 HEADERS = {
-    "x-rapidapi-key": "bd0d9c7e5cmsh218c3fb15824d3cp14f5b2jsn5d502ced974e",
-    "x-rapidapi-host": "imdb236.p.rapidapi.com"
+    "x-rapidapi-key": environ.get('API_KEY'),
+    "x-rapidapi-host": environ.get('API_HOST')
 }
 
 
@@ -18,7 +19,6 @@ def imdb_search_results(search_query):
     response.raise_for_status()
 
     return response.json()['results']
-
 
 def download_and_compress_img(image_url, instance):
     response = requests.get(image_url)

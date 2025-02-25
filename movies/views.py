@@ -1,4 +1,4 @@
-import datetime, ast
+import datetime
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils.http import urlencode
@@ -87,6 +87,8 @@ def add_new(request):
                 # Add new movie to user watchlist
                 user_watchlist = Watchlist.objects.get(user=request.user)
                 user_watchlist.movies.add(new_movie)
+            
+            return redirect('{}?{}'.format(reverse('add-new'), urlencode({'search': request.POST.get('search')})))
         else:
             #found_movies = []
             search_query = request.POST.get('search')
