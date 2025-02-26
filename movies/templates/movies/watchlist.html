@@ -3,14 +3,16 @@
 {% block title %}My Watchlist{% endblock %}
 
 {% block content %}
-{{test}}
     <div class="container mt-5">
         <div class="row justify-content-center mb-3">
             <div class="col-md-8 col-lg-6">
                 <div class="d-flex">
                     <form class="input-group" action="" method="get">
                         <input name="search" type="text" class="form-control" aria-label="Text input with segmented dropdown button" placeholder="Search for title" value="{% if prev_query %}{{ prev_query }}{% endif %}">
-                        <input type="hidden" name="selected_genres" value="{{ selected_genres }}">
+                        {% for selected_genre in selected_genres %}
+                            <input type="hidden" name="genre" value="{{ selected_genre }}">
+                        {% endfor %}
+                        <input type="hidden" name="year_order" value="{% if year_ordering %}{{ year_ordering }}{% else %}DESC{% endif %}">
                         <button type="submit" class="btn btn-outline-secondary">Search</button>
                     </form>
                     <a class="btn btn-outline-primary ms-2" style="white-space: nowrap;" href="{% url 'add-new' %}" id="add-new-button">Add New</a>
@@ -19,6 +21,9 @@
         </div>
         <form class="row justify-content-center mb-3" action="" method="get">
             <div class="d-flex col-md-8 col-lg-6">
+                {% if prev_query %}
+                    <input type="hidden" name="search" value="{{ prev_query }}">
+                {% endif %}
                 <div class="dropdown">
                     <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                       Genres
@@ -34,20 +39,9 @@
                         {% endfor %}
                     </ul>
                 </div>
-                <div class="dropdown ms-2">
-                    <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                      Release Year
-                    </button>
-                    <ul class="dropdown-menu px-2">
-                        {% for genre in genres %}
-                            <li>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="{{ genre.pk }}" id="genreCheck{{ genre.pk }}" name="genres">
-                                    <label class="form-check-label" for="genreCheck{{ genre.pk }}" onclick="event.stopPropagation();">{{ genre.name }}</label>
-                                </div>
-                            </li>
-                        {% endfor %}
-                    </ul>
+                <div class="ms-2">
+                    <input type="hidden" name="year_order" id="releaseYearInput" value="{% if year_ordering %}{{ year_ordering }}{% else %}DESC{% endif %}">
+                    <button type="button" class="btn btn-primary" id="releaseYearButton" onclick="ChangeYearOrdering()">Release Year ({% if year_ordering %}{{ year_ordering }}{% else %}DESC{% endif %})</button>
                 </div>
                 <button type="submit" class="btn btn-outline-primary ms-2" style="white-space: nowrap;">Apply Filters</button>
                 <a  class="btn btn-outline-secondary ms-2" href="{% url 'watchlist' %}">Reset</a>
@@ -81,7 +75,7 @@
                 </div>
             {% endfor %}
         {% else %}
-            <p>No titles were found</p>
+            <p class="text-center">No titles were found</p>
         {% endif %}
         </div>
 
@@ -110,4 +104,14 @@
             </nav>
         {% endif %}
     </div>
+
+    <script>
+        function ChangeYearOrdering() {
+            var input = document.getElementById('releaseYearInput');
+            var button = document.getElementById('releaseYearButton');
+
+            input.value = input.value === 'DESC' ? 'ASC' : 'DESC';
+            button.textContent = 'Release Year (' + input.value + ')';
+        }
+    </script>
 {% endblock %}
