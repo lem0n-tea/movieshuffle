@@ -31,7 +31,12 @@ def watchlist(request):
     if selected_genres:
         movies = movies.filter(genres__in=selected_genres).distinct()
 
-    movies = movies.order_by('title')
+    # Order by release year
+    year_ordering = request.GET.get('year_order')
+    if year_ordering == 'ASC':
+        movies = movies.order_by('release_year')
+    else:
+        movies = movies.order_by('-release_year')
 
     # Pagination
     paginator = Paginator(movies, 5)
@@ -44,14 +49,13 @@ def watchlist(request):
     else:
         closest_pages = get_neighbor_pages(paginator.num_pages, 1)
 
-    test = request.GET.get('selected_genres')
     return render(request, 'movies/watchlist.html', context={
         'movies': movies_for_display,
         'prev_query': search_query,
         'genres': available_genres,
         'selected_genres': selected_genres,
         'closest_pages': closest_pages,
-        'test': test,
+        'year_ordering': year_ordering,
     })
 
 @login_required
