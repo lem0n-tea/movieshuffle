@@ -1,20 +1,75 @@
 import datetime
-from django.shortcuts import render, redirect
+from random import choice
+
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.utils.http import urlencode
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
 from django.core.paginator import Paginator
 from .models import Watchlist, Genre, Movie, CachedSearch
 from .utils import imdb_search_results, download_and_compress_img, get_neighbor_pages
 
 
 def home(request):
-    return render(request, 'movies/home.html')
+    if request.user.is_authenticated:
+        if request.method == 'POST':
+            user_watchlist = Watchlist.objects.get(user=request.user)
+            movie = get_object_or_404(Movie, pk=request.POST.get('movie_id'))
+            user_watchlist.movies.remove(movie)
+        
+        # Retrieve movies from the user's watchlist
+        user_movies = Watchlist.objects.get(user=request.user).movies.all()
+        movie_count = len(user_movies)
+        random_movie = None
+
+        # Get a list of genres present in user watchlist
+        genre_ids = user_movies.values_list('genres', flat=True).distinct()
+
+        # Count movies per genre
+        movie_count_per_genre = {}
+        for genre_id in genre_ids:
+            movie_count_per_genre[genre_id] = user_movies.filter(genres=genre_id).count()
+
+        # Construct array of genre names and corresponding movie counts
+        available_genres = []
+        for id, count in movie_count_per_genre.items():
+            available_genres.append({
+                'id': id,
+                'name': Genre.objects.get(id=id).name,
+                'count': count
+            })
+
+        # Sort genres by movie count and name
+        available_genres = sorted(available_genres, reverse=True, key=lambda x: (-x['count'], x['name']))[::-1]
+
+        # Filter movies by selected genres
+        selected_genres = request.GET.getlist('genre')
+        if selected_genres:
+            if not 'all' in selected_genres:
+                selected_genres = [int(genre) for genre in selected_genres]
+                user_movies = user_movies.filter(genres__in=selected_genres).distinct()
+
+            # Pick a random title from the query set
+            if len(user_movies) > 0:
+                random_movie = choice(user_movies)
+
+        return render(request, 'movies/home.html', context={
+            'movie_count': movie_count,
+            'random_movie': random_movie,
+            'available_genres': available_genres,
+            'selected_genres': selected_genres,
+        })
+    else:
+        return render(request, 'movies/home.html')
 
 @login_required
 def watchlist(request):
-    user_watchlist = Watchlist.objects.filter(user=request.user)[0]
+    if request.method == 'POST':
+        user_watchlist = Watchlist.objects.get(user=request.user)
+        movie = get_object_or_404(Movie, pk=request.POST.get('movie_id'))
+        user_watchlist.movies.remove(movie)
+
+    user_watchlist = get_object_or_404(Watchlist, user=request.user)
     search_query = request.GET.get('search')
     
     if search_query:
@@ -31,12 +86,12 @@ def watchlist(request):
     if selected_genres:
         movies = movies.filter(genres__in=selected_genres).distinct()
 
-    # Order by release year
+    # Order by release year and title
     year_ordering = request.GET.get('year_order')
-    if year_ordering == 'ASC':
-        movies = movies.order_by('release_year')
+    if year_ordering == 'ascending':
+        movies = movies.order_by('release_year', 'title')
     else:
-        movies = movies.order_by('-release_year')
+        movies = movies.order_by('-release_year', 'title')
 
     # Pagination
     paginator = Paginator(movies, 5)
@@ -156,8 +211,6 @@ def add_new(request):
 
 @login_required
 def remove_movie(request, movie_id):
-    # TO KEEP SEARCH QUERY IN BAR AFTER REMOVAL, REWRITE DELETION TO PERFORM ON POST
-    #search_query = request.GET.get('search')
     user_watchlist = Watchlist.objects.get(user=request.user)
     movie = Movie.objects.get(imdb_id=movie_id)
     user_watchlist.movies.remove(movie)

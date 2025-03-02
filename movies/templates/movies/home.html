@@ -20,6 +20,169 @@
             </div>
         </section>
     {% else %}
-        <h1>Greetings, {{ user.username }}!</h1>
-    {% endif %}
+    <!--<style>
+        .genre-checkbox {
+            display: none;
+        }
+    </style>-->
+    <div class="container mt-5">
+        {% if random_movie %}
+        <div class="card mb-3 col-md-8 col-lg-6 mx-auto">
+            <div class="row g-0">
+                <div class="col-md-4">
+                {% load static %}
+                <img src="{% if random_movie.poster %}{{ random_movie.poster.url }}{% else %}{% static 'img/cinema.svg' %}{% endif %}" class="img-fluid rounded-start" alt="Poster" loading="lazy">
+                </div>
+                <div class="col-md-8">
+                <div class="card-body d-flex flex-column h-100">
+                    <div class="mb-4">
+                        <h5 class="card-title">{{ random_movie.title }}</h5>
+                        {% if random_movie.description %}
+                            <p class="card-text">{{ random_movie.description }}</p>
+                        {% endif %}
+                        <p class="card-text mb-0"><small class="text-body-secondary">Genres: {{ random_movie.genre_list }}</small></p>
+                        <p class="card-text"><small class="text-body-secondary">Released: {{ random_movie.release_year }}</small></p>
+                    </div>
+                    <form action="" method="post" class="mt-auto">
+                        {% csrf_token %}
+                        <input type="hidden" name="movie_id" value="{{ random_movie.imdb_id }}">
+                        <button type="submit" class="btn btn-outline-danger">Remove</button>
+                    </form>
+                </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <div class="card col-md-8 col-lg-6 mx-auto mt-3 py-3">
+            <div class="row px-3">
+                <div class="col-4">
+                    <h2>Find<br>your<br>next<br>Watch</h2>
+                </div>
+                <div class="col-8">
+                    <h5>Hi, {{ user.username }}! What are you watching today?</h5>
+                    {% if movie_count == 0 %}
+                        <p>Looks like your <a href="{% url 'watchlist' %}" class="link-primary link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover">Watchlist</a> is empty.
+                            You can search for something new <a href="{% url 'add-new' %}" class="link-primary link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover">Here</a>!</p>
+                    {% else %}
+                    <form id="movieForm" action="" method="get">
+                        <p class="mb-1">Genres</p>
+                        <div class="d-inline-flex flex-wrap">
+                            <div class="genre-checkbox me-1 mb-1">
+                                <input type="checkbox" class="btn-check" id="all" name="genre" value="all">
+                                <label for="all" class="btn btn-outline-primary rounded-5">All<i class="bi bi-dot"></i>{{ movie_count }}</label>
+                            </div>
+                            {% for genre in available_genres %}
+                                <div class="genre-checkbox me-1 mb-1">
+                                    <input type="checkbox" class="btn-check" id="{{genre.name }}" name="genre" value="{{ genre.id }}" {% if genre.id in selected_genres %}checked{% endif %}>
+                                    <label for="{{ genre.name }}" class="btn btn-outline-primary rounded-5">{{ genre.name }}<i class="bi bi-dot"></i>{{ genre.count }}</label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <button id="genre-toggle-button" class="btn btn-outline-primary" style="display: none;" type="button">More</button>
+                        <a class="btn btn-outline-secondary w-100 d-block mt-3" href="{% url 'home' %}">Clear</a>
+                        <button type="submit" class="btn btn-outline-primary w-100 d-block mt-2">Shuffle</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const allCheckbox = document.getElementById('all');
+        const checkboxes = document.querySelectorAll('#movieForm input[type="checkbox"]:not(#all)');
+        
+        // Function to move checked items to the beginning with 'All' at the beginning
+        function reorderCheckboxes() {
+            const checkedCheckboxes = Array.from(checkboxes).filter(checkbox => checkbox.checked);
+            const uncheckedCheckboxes = Array.from(checkboxes).filter(checkbox => !checkbox.checked);
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.parentNode.parentNode.removeChild(checkbox.parentNode);
+            });
+            
+            // Append checked first and then unchecked
+            checkedCheckboxes.forEach(checkbox => {
+                allCheckbox.parentNode.parentNode.appendChild(checkbox.parentNode);
+            });
+            uncheckedCheckboxes.forEach(checkbox => {
+                allCheckbox.parentNode.parentNode.appendChild(checkbox.parentNode);
+            });
+            
+            // Ensure 'All' is checked when others aren't
+            if (checkedCheckboxes.length === 0) {
+                allCheckbox.checked = true;
+            }
+        }
+        
+        allCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                checkboxes.forEach(checkbox => checkbox.checked = false);
+                reorderCheckboxes();
+            } else {
+                // Prevent unchecking "All" if no other checkboxes are checked
+                const checkedCheckboxes = Array.from(checkboxes).filter(checkbox => checkbox.checked);
+                if (checkedCheckboxes.length === 0) {
+                    this.checked = true;
+                } else {
+                    reorderCheckboxes();
+                }
+            }
+        });
+        
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    allCheckbox.checked = false;
+                    reorderCheckboxes();
+                } else {
+                    // Check if any other checkboxes are still checked and check 'All' if not
+                    const checkedCheckboxes = Array.from(checkboxes).filter(checkbox => checkbox.checked);
+                    if (checkedCheckboxes.length === 0) {
+                        allCheckbox.checked = true;
+                    } else {
+                        reorderCheckboxes();
+                    }
+                }
+            });
+        });
+        
+        reorderCheckboxes();
+    });
+
+    /*
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkboxLimit = 6; // Maximum number of checkboxes to display initially
+        const toggleButton = document.getElementById('genre-toggle-button');
+
+        var checkboxes = document.getElementsByClassName('genre-checkbox')
+        
+        // Load initial number of checkboxes
+        for (let i = 0; i < Math.min(checkboxLimit, checkboxes.length); i++) {
+            checkboxes[i].style.display = 'block';
+        }
+
+        if (checkboxes.length > checkboxLimit) {
+            toggleButton.style.display = 'inline-block';
+        }
+
+        toggleButton.addEventListener('click', function() {
+            // Display the rest of checkboxes
+            if (this.innerHTML === 'More') {
+                for (let i = checkboxLimit; i < checkboxes.length; i++) {
+                    checkboxes[i].style.display = 'block';
+                }
+                this.innerHTML = 'Less';
+            }
+            // Hide 'excessive' checkboxes
+            else if (this.innerHTML === 'Less') {
+                for (let i = checkboxLimit; i < checkboxes.length; i++) {
+                    checkboxes[i].style.display = 'none';
+                }
+                this.innerHTML = 'More';
+            }
+        });
+    });*/
+</script>
+    {% endif %}  
 {% endblock %}

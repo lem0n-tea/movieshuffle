@@ -12,7 +12,7 @@
                         {% for selected_genre in selected_genres %}
                             <input type="hidden" name="genre" value="{{ selected_genre }}">
                         {% endfor %}
-                        <input type="hidden" name="year_order" value="{% if year_ordering %}{{ year_ordering }}{% else %}DESC{% endif %}">
+                        <input type="hidden" name="year_order" value="{% if year_ordering %}{{ year_ordering }}{% else %}descending{% endif %}">
                         <button type="submit" class="btn btn-outline-secondary">Search</button>
                     </form>
                     <a class="btn btn-outline-primary ms-2" style="white-space: nowrap;" href="{% url 'add-new' %}" id="add-new-button">Add New</a>
@@ -20,7 +20,7 @@
             </div>
         </div>
         <form class="row justify-content-center mb-3" action="" method="get">
-            <div class="d-flex col-md-8 col-lg-6">
+            <div class="d-flex justify-content-between justify-content-sm-start col-md-8 col-lg-6">
                 {% if prev_query %}
                     <input type="hidden" name="search" value="{{ prev_query }}">
                 {% endif %}
@@ -40,11 +40,11 @@
                     </ul>
                 </div>
                 <div class="ms-2">
-                    <input type="hidden" name="year_order" id="releaseYearInput" value="{% if year_ordering %}{{ year_ordering }}{% else %}DESC{% endif %}">
-                    <button type="button" class="btn btn-primary" id="releaseYearButton" onclick="ChangeYearOrdering()">Release Year ({% if year_ordering %}{{ year_ordering }}{% else %}DESC{% endif %})</button>
+                    <input type="hidden" name="year_order" id="releaseYearInput" value="{% if year_ordering %}{{ year_ordering }}{% else %}descending{% endif %}">
+                    <button type="button" class="btn btn-primary" id="releaseYearButton" onclick="ChangeYearOrdering()">Release Year {% if year_ordering == 'ascending' %}<i class="bi bi-chevron-double-up"></i>{% else %}<i class="bi bi-chevron-double-down"></i>{% endif %}</button>
                 </div>
                 <button type="submit" class="btn btn-outline-primary ms-2" style="white-space: nowrap;">Apply Filters</button>
-                <a  class="btn btn-outline-secondary ms-2" href="{% url 'watchlist' %}">Reset</a>
+                <a  class="d-flex align-items-center justify-content-center btn btn-outline-secondary ms-2" href="{% url 'watchlist' %}">Reset</a>
             </div>
         </form>
         <div class="d-flex flex-column justify-content-center">
@@ -66,9 +66,12 @@
                                 <p class="card-text mb-0"><small class="text-body-secondary">Genres: {{ movie.genre_list }}</small></p>
                                 <p class="card-text"><small class="text-body-secondary">Released: {{ movie.release_year }}</small></p>
                             </div>
-                            <div class="mt-auto">
-                                <a href="{% url 'movie-removal' movie.imdb_id %}" class="btn btn-outline-danger">Remove</a>
-                            </div>
+
+                            <form action="" method="post" class="mt-auto">
+                                {% csrf_token %}
+                                <input type="hidden" name="movie_id" value="{{ movie.imdb_id }}">
+                                <button type="submit" class="btn btn-outline-danger">Remove</button>
+                            </form>
                         </div>
                         </div>
                     </div>
@@ -110,8 +113,13 @@
             var input = document.getElementById('releaseYearInput');
             var button = document.getElementById('releaseYearButton');
 
-            input.value = input.value === 'DESC' ? 'ASC' : 'DESC';
-            button.textContent = 'Release Year (' + input.value + ')';
+            input.value = input.value === 'descending' ? 'ascending' : 'descending';
+            if (input.value === 'ascending') {
+                button.innerHTML = 'Release Year <i class="bi bi-chevron-double-up"></i>';
+            }
+            else {
+                button.innerHTML = 'Release Year <i class="bi bi-chevron-double-down"></i>';
+            }
         }
     </script>
 {% endblock %}

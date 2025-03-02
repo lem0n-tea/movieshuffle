@@ -54,7 +54,7 @@ class Movie(models.Model):
     
 class Watchlist(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    movies = models.ManyToManyField(Movie)
+    movies = models.ManyToManyField(Movie, blank=True)
 
     def __str__(self):
         return f"{self.user}'s watchlist"
