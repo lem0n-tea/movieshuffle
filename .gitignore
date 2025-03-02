@@ -176,5 +176,6 @@ cython_debug/
 # Database
 *.sqlite3
 
-# Environment variables
-.env
+# Movie posters
+media/posters/*
+!media/posters/.gitkeep
