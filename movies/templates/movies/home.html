@@ -2,20 +2,19 @@
 
 {% block content %}
     {% if not user.is_authenticated %}
-        <section class="pt-5 text-start">
+        <section class="pt-5 text-start col-md-8 col-lg-6 mx-auto">
             <div class="container">
                 <div class="d-sm-flex align-items-center justify-content-between">
                     <div>
-                        <h1>Welcome to <span class="text-primary">Discover Your Next Watch with Ease</span></h1>
-                        <p>Can't pick a title for a movie night? Let <span class="fw-semibold">Movie Shuffle</span> suggest one from your collected watchlist!</p>
-                        <p>Collect your favorite movies and TV series in one place and let our app surprise you with a randomized pick from your watchlist. Apply filters to match your mood, and enjoy a new discovery every time!</p>
+                        <h1 class="text-success">Discover Your Next Watch<br>with Ease</h1>
+                        <p>Collect your favorite movies and TV series in one place and let <strong class="text-success">Movie Shuffle</strong> surprise you with a randomized pick from your watchlist. Apply filters to match your mood, and enjoy a new discovery every time!</p>
                         <div class="d-sm-flex align-items-center">
-                            <a class="nav-link border border-primary bg-primary text-light rounded-2 me-2 py-2 px-3" href="{% url 'login' %}" id="login-link">Log In</a>
-                            <a class="nav-link border border-dark rounded-2 py-2 px-3" href="{% url 'signup' %}" id="sign-up-link">Sign Up</a>
+                            <a class="btn btn-outline-success me-2 py-2 px-3" href="{% url 'login' %}">Log In</a>
+                            <a class="btn btn-outline-primary py-2 px-3" href="{% url 'signup' %}">Sign Up</a>
                         </div>
                     </div>
                     {% load static %}
-                    <img src="{% static 'img/cinema.svg' %}" alt="Home cinema" class="img-fluid w-50 d-none d-sm-block">
+                    <img src="{% static 'img/film.svg' %}" alt="Film" class="img-fluid w-50 d-none d-sm-block ms-5">
                 </div>
             </div>
         </section>
@@ -27,11 +26,11 @@
     </style>-->
     <div class="container mt-5">
         {% if random_movie %}
-        <div class="card mb-3 col-md-8 col-lg-6 mx-auto">
+        <div class="card mb-3 col-md-8 col-lg-6 mx-auto overflow-hidden">
             <div class="row g-0">
                 <div class="col-md-4">
                 {% load static %}
-                <img src="{% if random_movie.poster %}{{ random_movie.poster.url }}{% else %}{% static 'img/cinema.svg' %}{% endif %}" class="img-fluid rounded-start" alt="Poster" loading="lazy">
+                <img src="{% if random_movie.poster %}{{ random_movie.poster.url }}{% else %}{% static 'img/cinema.svg' %}{% endif %}" class="img-fluid" alt="Poster" loading="lazy">
                 </div>
                 <div class="col-md-8">
                 <div class="card-body d-flex flex-column h-100">
@@ -56,10 +55,10 @@
         <div class="card col-md-8 col-lg-6 mx-auto mt-3 py-3">
             <div class="row px-3">
                 <div class="col-4">
-                    <h2>Find<br>your<br>next<br>Watch</h2>
+                    <h2 class="fs-1 fw-bold lh-1">Find<br>your<br>next<br>Watch</h2>
                 </div>
                 <div class="col-8">
-                    <h5>Hi, {{ user.username }}! What are you watching today?</h5>
+                    <h5>Hi, <strong class="text-success">{{ user.username }}</strong>! What are you watching today?</h5>
                     {% if movie_count == 0 %}
                         <p>Looks like your <a href="{% url 'watchlist' %}" class="link-primary link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover">Watchlist</a> is empty.
                             You can search for something new <a href="{% url 'add-new' %}" class="link-primary link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover">Here</a>!</p>
@@ -79,8 +78,8 @@
                             {% endfor %}
                         </div>
                         <button id="genre-toggle-button" class="btn btn-outline-primary" style="display: none;" type="button">More</button>
-                        <a class="btn btn-outline-secondary w-100 d-block mt-3" href="{% url 'home' %}">Clear</a>
-                        <button type="submit" class="btn btn-outline-primary w-100 d-block mt-2">Shuffle</button>
+                        <a class="btn btn-outline-primary w-100 d-block mt-3" href="{% url 'home' %}">Clear</a>
+                        <button type="submit" class="btn btn-outline-success w-100 d-block mt-2">Shuffle</button>
                     </form>
                     {% endif %}
                 </div>

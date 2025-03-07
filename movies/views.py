@@ -208,11 +208,3 @@ def add_new(request):
             'user_movies': user_movies,
             #'found_movies': found_movies,
         })
-
-@login_required
-def remove_movie(request, movie_id):
-    user_watchlist = Watchlist.objects.get(user=request.user)
-    movie = Movie.objects.get(imdb_id=movie_id)
-    user_watchlist.movies.remove(movie)
-
-    return redirect(reverse('watchlist'))

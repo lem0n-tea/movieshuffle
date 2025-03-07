@@ -1,6 +1,6 @@
 {% extends 'movies/base.html' %}
 
-{% block title %}My Watchlist{% endblock %}
+{% block title %}My Watchlist | {% endblock %}
 
 {% block content %}
     <div class="container mt-5">
@@ -15,7 +15,7 @@
                         <input type="hidden" name="year_order" value="{% if year_ordering %}{{ year_ordering }}{% else %}descending{% endif %}">
                         <button type="submit" class="btn btn-outline-secondary">Search</button>
                     </form>
-                    <a class="btn btn-outline-primary ms-2" style="white-space: nowrap;" href="{% url 'add-new' %}" id="add-new-button">Add New</a>
+                    <a class="btn btn-outline-success ms-2" style="white-space: nowrap;" href="{% url 'add-new' %}" id="add-new-button">Add New</a>
                 </div>
             </div>
         </div>
@@ -25,7 +25,7 @@
                     <input type="hidden" name="search" value="{{ prev_query }}">
                 {% endif %}
                 <div class="dropdown">
-                    <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <button class="btn btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                       Genres
                     </button>
                     <ul class="dropdown-menu px-2">
@@ -41,20 +41,20 @@
                 </div>
                 <div class="ms-2">
                     <input type="hidden" name="year_order" id="releaseYearInput" value="{% if year_ordering %}{{ year_ordering }}{% else %}descending{% endif %}">
-                    <button type="button" class="btn btn-primary" id="releaseYearButton" onclick="ChangeYearOrdering()">Release Year {% if year_ordering == 'ascending' %}<i class="bi bi-chevron-double-up"></i>{% else %}<i class="bi bi-chevron-double-down"></i>{% endif %}</button>
+                    <button type="button" class="btn btn-success" id="releaseYearButton" onclick="ChangeYearOrdering()">Release Year {% if year_ordering == 'ascending' %}<i class="bi bi-chevron-double-up"></i>{% else %}<i class="bi bi-chevron-double-down"></i>{% endif %}</button>
                 </div>
-                <button type="submit" class="btn btn-outline-primary ms-2" style="white-space: nowrap;">Apply Filters</button>
+                <button type="submit" class="btn btn-outline-success ms-2" style="white-space: nowrap;">Apply Filters</button>
                 <a  class="d-flex align-items-center justify-content-center btn btn-outline-secondary ms-2" href="{% url 'watchlist' %}">Reset</a>
             </div>
         </form>
         <div class="d-flex flex-column justify-content-center">
         {% if movies %}
             {% for movie in movies %}
-                <div class="card mb-3 col-md-8 col-lg-6 mx-auto">
+                <div class="card mb-3 col-md-8 col-lg-6 mx-auto overflow-hidden">
                     <div class="row g-0">
                         <div class="col-md-4">
                         {% load static %}
-                        <img src="{% if movie.poster %}{{ movie.poster.url }}{% else %}{% static 'img/cinema.svg' %}{% endif %}" class="img-fluid rounded-start" alt="Poster" loading="lazy">
+                        <img src="{% if movie.poster %}{{ movie.poster.url }}{% else %}{% static 'img/cinema.svg' %}{% endif %}" class="img-fluid" alt="Poster" loading="lazy">
                         </div>
                         <div class="col-md-8">
                         <div class="card-body d-flex flex-column h-100">
